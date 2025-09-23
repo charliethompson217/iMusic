@@ -77,13 +77,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             settingsWindow?.center()
             settingsWindow?.title = "Settings"
             settingsWindow?.titlebarAppearsTransparent = true
+            settingsWindow?.isReleasedWhenClosed = false
             
             let settingsView = SettingsView()
                 .environmentObject(settings)
             let hostingController = NSHostingController(rootView: settingsView)
             settingsWindow?.contentView = hostingController.view
         }
-        settingsWindow?.makeKeyAndOrderFront(nil)
+        
+        if settingsWindow?.contentView != nil {
+            settingsWindow?.makeKeyAndOrderFront(nil)
+        } else {
+            settingsWindow = nil
+            showSettings()
+        }
     }
     
     @objc func refreshLibrary() {
