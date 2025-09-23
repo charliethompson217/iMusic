@@ -1,0 +1,32 @@
+# Xcode
+*.xcuserstate
+*.xcuserdatad/
+*.xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcshareddata/xcschemes/*.xcscheme
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+*.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+
+# Swift Package Manager
+*.resolved
+.build/
+Packages/
+Package.resolved
+
+# Build products
+build/
+DerivedData/
+*.dSYM
+*.app
+
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Other
+*.log
+*.bak
