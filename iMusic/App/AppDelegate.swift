@@ -95,6 +95,5 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @objc func refreshLibrary() {
         MusicPlayerManager.shared.libraryManager.selectMusicDirectory()
-        MusicPlayerManager.shared.libraryManager.refreshLibrary()
     }
 }

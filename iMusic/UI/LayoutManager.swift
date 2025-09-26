@@ -49,7 +49,7 @@ struct LayoutManager: View {
                     NowPlayingView()
                     PlaybackButtonsView()
                     SeekSliderView()
-                    SongTableView()
+                    LibraryBrowserView()
                 }
                 if appState.lyricsOpen {
                     LyricsView()
@@ -66,7 +66,7 @@ struct LayoutManager: View {
                         }
                     }
                     SeekSliderView()
-                    SongTableView()
+                    LibraryBrowserView()
                 }
                 if appState.lyricsOpen {
                     LyricsView()

@@ -20,23 +20,33 @@ class PlaybackManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
     
     private var player: AVAudioPlayer?
     private let libraryManager: LibraryManager
-    private var shuffledLibrary: [LibraryManager.Song]?
+    private var currentPlaylist: [LibraryManager.Song]?
+    private var shuffledPlaylist: [LibraryManager.Song]?
     
     init(libraryManager: LibraryManager) {
         self.libraryManager = libraryManager
         super.init()
     }
     
+    func updateCurrentPlaylist(_ playlist: [LibraryManager.Song]) {
+        currentPlaylist = playlist
+        if isShuffleEnabled {
+            var rng = SystemRandomNumberGenerator()
+            shuffledPlaylist = playlist.shuffled(using: &rng)
+        } else {
+            shuffledPlaylist = nil
+        }
+    }
+    
     func toggleShuffle() {
         isShuffleEnabled.toggle()
         
         if isShuffleEnabled {
-            if let library = libraryManager.library as? [LibraryManager.Song] {
-                var rng = SystemRandomNumberGenerator()
-                shuffledLibrary = library.shuffled(using: &rng)
-            }
+            let playlistToShuffle = currentPlaylist ?? libraryManager.library
+            var rng = SystemRandomNumberGenerator()
+            shuffledPlaylist = playlistToShuffle.shuffled(using: &rng)
         } else {
-            shuffledLibrary = nil
+            shuffledPlaylist = nil
         }
     }
     
@@ -57,7 +67,7 @@ class PlaybackManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
         }
     }
     
-    func playSong(_ song: LibraryManager.Song) {
+    func playSong(_ song: LibraryManager.Song, initialPlaylist: [LibraryManager.Song]? = nil) {
         guard let dirURL = libraryManager.musicDirectoryURL else {
             print("DEBUG: No music directory URL available for security-scoped access")
             return
@@ -92,40 +102,40 @@ class PlaybackManager: NSObject, ObservableObject, AVAudioPlayerDelegate {
             } else {
                 currentAlbumArt = nil
             }
+            
+            if let playlist = initialPlaylist {
+                updateCurrentPlaylist(playlist)
+            }
         } catch {
             print("Error playing song: \(error)")
         }
     }
     
+    private func getPlaylistForNavigation() -> [LibraryManager.Song] {
+        if isShuffleEnabled, let shuffled = shuffledPlaylist {
+            return shuffled
+        } else {
+            return currentPlaylist ?? libraryManager.library
+        }
+    }
+    
     func nextSong() {
         guard let current = currentSong else { return }
+        let playlist = getPlaylistForNavigation()
         
-        if isShuffleEnabled, let shuffled = shuffledLibrary {
-            if let currentIndex = shuffled.firstIndex(where: { $0.id == current.id }),
-               currentIndex + 1 < shuffled.count {
-                playSong(shuffled[currentIndex + 1])
-            } else if !shuffled.isEmpty {
-                playSong(shuffled[0])
-            }
-        } else if let library = libraryManager.library as? [LibraryManager.Song],
-                  let currentIndex = library.firstIndex(where: { $0.id == current.id }),
-                  currentIndex + 1 < library.count {
-            playSong(library[currentIndex + 1])
+        if let currentIndex = playlist.firstIndex(where: { $0.id == current.id }),
+           currentIndex + 1 < playlist.count {
+            playSong(playlist[currentIndex + 1])
         }
     }
     
     func previousSong() {
         guard let current = currentSong else { return }
+        let playlist = getPlaylistForNavigation()
         
-        if isShuffleEnabled, let shuffled = shuffledLibrary {
-            if let currentIndex = shuffled.firstIndex(where: { $0.id == current.id }),
-               currentIndex > 0 {
-                playSong(shuffled[currentIndex - 1])
-            }
-        } else if let library = libraryManager.library as? [LibraryManager.Song],
-                  let currentIndex = library.firstIndex(where: { $0.id == current.id }),
-                  currentIndex > 0 {
-            playSong(library[currentIndex - 1])
+        if let currentIndex = playlist.firstIndex(where: { $0.id == current.id }),
+           currentIndex > 0 {
+            playSong(playlist[currentIndex - 1])
         }
     }
     
